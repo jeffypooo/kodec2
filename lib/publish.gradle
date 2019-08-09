@@ -1,0 +1,81 @@
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+version ext.kodec2VersionName//'1.0.0.alpha01'
+group 'com.beartooth'
+
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    archiveFileName = 'kodec2-sources.jar'
+    from android.sourceSets.main.java.srcDirs
+}
+
+publishing {
+    publications {
+        android.libraryVariants.all { variant ->
+            def isDebug = variant.buildType.name.contains("debug")
+            "Kodec2${variant.name.capitalize()}Aar"(MavenPublication) {
+                artifact isDebug ? bundleDebugAar : bundleReleaseAar
+                artifact sourcesJar
+                groupId group
+                artifactId "kodec2"
+                version isDebug ? "${version}.debug" : version
+                pom {
+                    packaging = 'aar'
+                    name = 'Kodec 2'
+                    description = 'A lightweight Kotlin API for using Codec 2 in Android apps.'
+                    url = 'www.beartooth.com'
+                    inceptionYear = '2019'
+                    licenses {
+                        license {
+                            name = 'The Apache Software License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'masterjefferson'
+                            name = 'Jefferson Jones'
+                            email = 'jeff@beartooth.com'
+                        }
+                    }
+                    withXml {
+                        def dependenciesNode = asNode().appendNode('dependencies')
+                        // add dependency nodes for transitive deps
+                        configurations.implementation.allDependencies.each {
+                            // ensure dependencies such as fileTree are not included
+                            if (it.name != 'unspecified') {
+                                def dependencyNode = dependenciesNode.appendNode('dependency')
+                                dependencyNode.appendNode('groupId', it.group)
+                                dependencyNode.appendNode('artifactId', it.name)
+                                dependencyNode.appendNode('version', it.version)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    override = true
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    publications = ['Kodec2DebugAar', 'Kodec2ReleaseAar']
+    pkg {
+        repo = 'beartooth-core'
+        name = 'kodec2'
+        userOrg = 'beartooth'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/Beartooth/kodec2'
+        labels = ['aar', 'android', 'codec2', 'vocoder', 'codec']
+        publicDownloadNumbers = true
+        version {
+            name = version
+            desc = "Kodec 2 v$version"
+            released = new Date()
+        }
+    }
+
+}

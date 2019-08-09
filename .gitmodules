@@ -1,1 +1,4 @@
 
+[submodule "lib/src/main/cpp/codec2"]
+	path = lib/src/main/cpp/codec2
+	url = git@github.com:Beartooth/codec2.git
