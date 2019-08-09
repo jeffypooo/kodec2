@@ -19,7 +19,7 @@ publishing {
                 artifact sourcesJar
                 groupId group
                 artifactId "kodec2"
-                version isDebug ? "${version}.debug" : version
+                version isDebug ? "${kodec2VersionName}.debug" : kodec2VersionName
                 pom {
                     packaging = 'aar'
                     name = 'Kodec 2'
@@ -72,8 +72,8 @@ bintray {
         labels = ['aar', 'android', 'codec2', 'vocoder', 'codec']
         publicDownloadNumbers = true
         version {
-            name = version
-            desc = "Kodec 2 v$version"
+            name = kodec2VersionName
+            desc = "Kodec 2 v$kodec2VersionName"
             released = new Date()
         }
     }
